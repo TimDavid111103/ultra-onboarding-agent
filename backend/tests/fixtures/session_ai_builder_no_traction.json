@@ -1,0 +1,87 @@
+{
+  "_description": "Strong technical builder, advanced AI/backend stack, no competition wins, no paying customers, no formal lab. Expected: Internship Tier 3, College Score 3, Entrepreneurship Tier 4, Research Tier 3.",
+  "resume_data": {
+    "name": "Alex Kim",
+    "graduation_year": 2026,
+    "gpa": 3.95,
+    "test_scores": { "SAT": 1540, "ACT": null },
+    "courses": ["AP Computer Science A", "AP Calculus BC", "AP Physics C", "AP Biology"],
+    "activities": ["Personal AI/software projects", "School coding club (member)"],
+    "work_experience": [],
+    "skills": ["Python", "FastAPI", "React", "PostgreSQL", "Docker", "LangChain", "OpenAI API"],
+    "awards": [],
+    "summary_detected": ""
+  },
+  "conversation": [
+    {
+      "role": "assistant",
+      "content": "Hi Alex! I've had a chance to look over your resume — impressive technical stack for a junior. I'd love to hear more about what you've actually been building. What's the most complex project you've worked on, and what problem were you trying to solve?"
+    },
+    {
+      "role": "user",
+      "content": "Yeah, so for the past three months I've been building this AI tutoring app. It uses a multi-agent pipeline — one agent breaks down the student's question, another retrieves relevant content from a vector store, and a third one synthesizes an explanation tailored to the student's level. The backend is FastAPI with async endpoints, and I'm using LangChain for the agent orchestration. I built the whole thing myself."
+    },
+    {
+      "role": "assistant",
+      "content": "That's a genuinely sophisticated architecture — most people don't think through the retrieval and synthesis separation at your stage. Who's actually using it right now? And what made you choose AI tutoring specifically?"
+    },
+    {
+      "role": "user",
+      "content": "Honestly just me and a couple friends testing it. I haven't launched publicly yet — I'm still polishing the UI. I chose tutoring because I struggled a lot with AP Physics and felt like existing tools like Khan Academy were too generic. I wanted something that actually adapts to how you think, not just what you got wrong."
+    },
+    {
+      "role": "assistant",
+      "content": "That's a clear personal pain point, which is a good foundation. Let me ask about the bigger picture — where do you see yourself in five years? Are you more drawn to building products like this, going deep into research on how these models work, or something else entirely?"
+    },
+    {
+      "role": "user",
+      "content": "I think I want to go to a strong CS program — ideally MIT or Carnegie Mellon — and then work at a company like Anthropic or OpenAI. I'm really interested in how LLMs reason, like why chain-of-thought prompting works. I've read a few papers on it — the original chain-of-thought paper by Wei et al. and some work on scratchpad reasoning — but I haven't done any formal research. I'd love to do research eventually but I don't even know where to start."
+    },
+    {
+      "role": "assistant",
+      "content": "That intellectual curiosity comes through clearly, and knowing specific papers puts you ahead of most. One last thing — tell me about what you're most excited to work on next after the tutoring app."
+    },
+    {
+      "role": "user",
+      "content": "I want to add a feature that tracks how a student's understanding evolves over multiple sessions — like a longitudinal model of their knowledge gaps. And longer term I want to open-source the agent framework I built so other people can build on it."
+    }
+  ],
+  "github_activity": {
+    "total_contributions_last_6_months": 163,
+    "monthly_breakdown": {
+      "2024-10": 52,
+      "2024-11": 41,
+      "2024-12": 28,
+      "2025-01": 3,
+      "2025-02": 31,
+      "2025-03": 8
+    },
+    "public_repos": 6,
+    "top_repos": [
+      {
+        "name": "ai-tutoring-app",
+        "stars": 0,
+        "forks": 0,
+        "primary_language": "Python",
+        "description": "Multi-agent AI tutoring pipeline with RAG backend"
+      },
+      {
+        "name": "fastapi-experiments",
+        "stars": 0,
+        "forks": 0,
+        "primary_language": "Python",
+        "description": ""
+      },
+      {
+        "name": "leetcode-solutions",
+        "stars": 0,
+        "forks": 0,
+        "primary_language": "Python",
+        "description": ""
+      }
+    ],
+    "top_languages": ["Python", "TypeScript", "JavaScript"],
+    "longest_streak_days": 18,
+    "account_age_years": 2
+  }
+}
