@@ -1,0 +1,113 @@
+{
+  "_description": "Strong entrepreneurial instincts with real customer discovery (12 interviews, specific pricing), shipped one personal project with 3 iterations, 14-month consistent self-directed habit. Technical ability is early but real. Expected: Internship Tier 3, College Score 3, Entrepreneurship Tier 2, Research Tier 5.",
+  "resume_data": {
+    "name": "Maya Chen",
+    "graduation_year": 2027,
+    "gpa": 3.87,
+    "test_scores": { "SAT": null, "ACT": null },
+    "courses": ["AP Calculus BC", "AP Computer Science A", "AP English Language"],
+    "activities": [
+      "DECA (2 years, regionals competitor, placed 4th)",
+      "Coding Club (1.5 years)",
+      "Food bank volunteer (~20 hours, sophomore year)"
+    ],
+    "work_experience": [],
+    "skills": ["Python", "JavaScript", "Web scraping", "Self-deployment"],
+    "awards": [],
+    "summary_detected": "I like building things and solving problems I actually run into. I made an app to help my family find cheap restaurants nearby. I'm working on something to help students find tutors."
+  },
+  "conversation": [
+    {
+      "role": "assistant",
+      "content": "Maya, I've had a chance to look over your resume — I can see you built a restaurant price comparison app and you've been thinking about a tutor-matching platform. I'd love to start there. What made you decide to build the restaurant app? Walk me through how that started."
+    },
+    {
+      "role": "user",
+      "content": "Honestly, it started because my family was really watching our budget that year. My mom would spend like 20 minutes every night trying to figure out where we could eat cheap, and she'd end up just going to the same two places. I thought there had to be a better way to just compare prices in our area, but I couldn't find anything that did it locally, so I decided to try to build it."
+    },
+    {
+      "role": "assistant",
+      "content": "That's a very concrete, personal reason to build something — and it's a good sign when a product solves a real problem in your own life. How did you actually go about building it? Did you have prior experience, or were you figuring it out as you went?"
+    },
+    {
+      "role": "user",
+      "content": "Figuring it out. I tried following a web scraping tutorial first and it completely broke — the site structures were nothing like the tutorial. So I just started reading documentation and trying different things. It took way longer than I expected. I built three different versions over about two months before it actually worked the way I wanted. The first one just crashed, the second one worked but was really slow, and the third one I made it look decent and deployed it myself."
+    },
+    {
+      "role": "assistant",
+      "content": "Three iterations over two months is real commitment, especially without anyone telling you to do it. You mentioned 10 users — do you know who they are? Did people find it actually useful?"
+    },
+    {
+      "role": "user",
+      "content": "A few are friends and family. Two or three I don't know at all — they found it on GitHub, I think. I never promoted it. It kind of just sits there now. I should probably do more with it but I've been thinking more about the tutor app lately."
+    },
+    {
+      "role": "assistant",
+      "content": "Let's talk about DECA first, actually. Your resume shows you competed at regionals and placed 4th. Can you tell me more about that project? What did you actually build for the competition?"
+    },
+    {
+      "role": "user",
+      "content": "It was a full business plan for a subscription snack box for athletes — like protein bars targeted at high school sports teams. I did market sizing, looked at what similar companies charged, figured out a distribution model through school athletic departments. I placed 4th out of about 30 teams at regionals. I didn't put too much about it on my resume because I didn't think 4th place was that impressive."
+    },
+    {
+      "role": "assistant",
+      "content": "I'd push back on that — most students your age have never built a complete business plan with real market sizing and a distribution strategy. That's the kind of work that matters more than the placement. How did that experience shape how you approached the tutor app?"
+    },
+    {
+      "role": "user",
+      "content": "Honestly, a lot. With the tutor app I knew I needed to actually talk to people before I built anything. So I spent the last eight months doing research. I interviewed 12 students across two different schools — asked them what they'd pay, whether they'd actually use a matching platform, what made them trust a tutor. I found that people want to pay per session, not a subscription. I landed on $25 as the right price point. And I figured out the business model — I'd take a 15% cut of the first session booking. I have the whole thing documented in Notion with wireframes and everything."
+    },
+    {
+      "role": "assistant",
+      "content": "That is genuinely sophisticated for a high schooler — 12 interviews across two schools, a specific price point with reasoning, and a clear monetization model. What's stopping you from building it now?"
+    },
+    {
+      "role": "user",
+      "content": "I just don't know where to start with a two-sided marketplace. The restaurant app was a single page that scraped stuff. A marketplace is different — you have to manage both sides, there's auth, there's payments. I know exactly what I want it to do, I just don't know the technical path yet."
+    },
+    {
+      "role": "assistant",
+      "content": "That's a solvable problem — and knowing what you don't know is a good place to be. Where do you see yourself in five years? Are you more drawn to the product and business side, the engineering side, or both?"
+    },
+    {
+      "role": "user",
+      "content": "Both, I think. I want to build things but I also care about whether they actually work as a business. I'd probably want to study CS or something business-adjacent at a school with a strong entrepreneurship program — maybe UT Austin or USC. I've been thinking about applying to some coding accelerators this summer to actually learn how to build the tutor app."
+    },
+    {
+      "role": "assistant",
+      "content": "That makes a lot of sense given where your interests are. One more thing — your resume mentions about 6 hours a week on personal projects for the past 14 months. That's a consistent habit, especially through finals and summer. What drives that?"
+    },
+    {
+      "role": "user",
+      "content": "I think it's that I actually care about the problems I'm working on. The restaurant app was for my mom. The tutor app is because I've paid for tutors that weren't a good fit, and my friends have the same problem. When I care about the problem it doesn't feel like 6 hours. It feels like just doing what I want to do."
+    },
+    {
+      "role": "assistant",
+      "content": "That's the kind of answer that's hard to teach — caring about the problem enough that the work doesn't feel like work. Maya, this has been a really good conversation. You're further along than you probably give yourself credit for. We've got everything we need to put together your profile."
+    }
+  ],
+  "github_activity": {
+    "total_contributions_last_6_months": 22,
+    "monthly_breakdown": {
+      "2025-10": 8,
+      "2025-11": 3,
+      "2025-12": 4,
+      "2026-01": 2,
+      "2026-02": 3,
+      "2026-03": 2
+    },
+    "public_repos": 1,
+    "top_repos": [
+      {
+        "name": "restaurant-price-compare",
+        "stars": 2,
+        "forks": 0,
+        "primary_language": "Python",
+        "description": "Local restaurant menu scraper and price comparison tool"
+      }
+    ],
+    "top_languages": ["Python", "JavaScript", "HTML"],
+    "longest_streak_days": 9,
+    "account_age_years": 2
+  }
+}
