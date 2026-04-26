@@ -4,7 +4,7 @@
     "name": "Maya Chen",
     "graduation_year": 2027,
     "gpa": 3.87,
-    "test_scores": { "SAT": 1380, "ACT": 31 },
+    "test_scores": { "SAT": 1440, "ACT": 33 },
     "courses": ["AP Calculus BC", "AP Computer Science A", "AP English Language"],
     "activities": [
       "DECA (2 years, regionals competitor, placed 4th)",
