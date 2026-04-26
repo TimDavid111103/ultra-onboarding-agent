@@ -14,10 +14,10 @@ class Session:
     is_complete: bool = False
     coverage: dict[str, int] = field(default_factory=lambda: {
         "academics": 0,
-        "activities": 0,
-        "goals": 0,
-        "values": 0,
-        "opportunity_fit": 0,
+        "extracurriculars": 0,
+        "experience_and_projects": 0,
+        "goals_and_interests": 0,
+        "character_and_drive": 0,
     })
 
 
@@ -29,7 +29,7 @@ class Session:
 # GitHubActivity shape:
 # {
 #   "total_contributions_last_6_months": int,
-#   "monthly_breakdown": {"YYYY-MM": int, ...},  # <5 in a month = notable dip
+#   "monthly_breakdown": {"YYYY-MM": int, ...}, 
 #   "public_repos": int,
 #   "top_repos": [{"name": str, "stars": int, "forks": int,
 #                  "primary_language": str, "description": str}],

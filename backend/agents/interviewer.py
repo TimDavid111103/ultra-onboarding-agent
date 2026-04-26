@@ -20,18 +20,21 @@ INTERVIEW_TOOL = {
                 "description": "Coverage depth (0=not covered, 1=surface, 2=good, 3=deep) for each area.",
                 "properties": {
                     "academics": {"type": "integer", "minimum": 0, "maximum": 3},
-                    "activities": {"type": "integer", "minimum": 0, "maximum": 3},
-                    "goals": {"type": "integer", "minimum": 0, "maximum": 3},
-                    "values": {"type": "integer", "minimum": 0, "maximum": 3},
-                    "opportunity_fit": {"type": "integer", "minimum": 0, "maximum": 3},
+                    "extracurriculars": {"type": "integer", "minimum": 0, "maximum": 3},
+                    "experience_and_projects": {"type": "integer", "minimum": 0, "maximum": 3},
+                    "goals_and_interests": {"type": "integer", "minimum": 0, "maximum": 3},
+                    "character_and_drive": {"type": "integer", "minimum": 0, "maximum": 3},
                 },
-                "required": ["academics", "activities", "goals", "values", "opportunity_fit"],
+                "required": [
+                    "academics", "extracurriculars", "experience_and_projects",
+                    "goals_and_interests", "character_and_drive",
+                ],
             },
             "is_complete": {
                 "type": "boolean",
                 "description": (
-                    "Set to true once ALL coverage areas are >= 1 AND you have asked "
-                    "at least 3 questions AND you have said a warm closing message."
+                    "Set to true once ALL coverage areas are >= 2 AND you have asked "
+                    "at least 8 questions AND you have said a warm closing message."
                 ),
             },
         },
@@ -49,24 +52,38 @@ You have already reviewed the student's resume:
 {resume_json}
 </resume>
 
-Your job is to conduct a friendly, conversational interview that uncovers information the \
-resume doesn't capture — motivations, story, values, and specific interests across Ultra's \
-four opportunity categories:
-  1. College admissions (target schools, reach/match/safety thinking, essay themes)
-  2. Internships (industries, roles, companies of interest)
-  3. Research (academic fields, labs, professors, prior research)
-  4. Entrepreneurship (ideas, projects, risk appetite, role models)
+Your job is to conduct a friendly, in-depth conversational interview that uncovers what the \
+resume cannot capture. You are gathering raw material that will be used to rate the student \
+across four opportunity areas:
+
+  1. COLLEGE ADMISSIONS — target schools and why, academic strengths and rigor, \
+     extracurricular depth and leadership, intellectual curiosity, personal character
+  2. INTERNSHIPS — technical skills and what they've actually built, project depth, \
+     development experience (users, validation, real-world output), work ethic and consistency
+  3. RESEARCH — scientific or academic interests, papers or topics they've engaged with, \
+     prior lab or project experience, commitment to going deep on hard problems
+  4. ENTREPRENEURSHIP — ideas they've had or pursued, any products or customers, \
+     business instincts, risk appetite, self-direction and hustle
+
+COVERAGE AREAS — make sure you gather depth on all five before closing:
+  - academics: GPA context, course rigor, favorite subjects, intellectual wins beyond grades
+  - extracurriculars: clubs, sports, leadership, community involvement, arts
+  - experience_and_projects: what they've built or worked on, who uses it, technical depth, \
+    work or research experience, output and validation
+  - goals_and_interests: target colleges and reasoning, career direction, research interests, \
+    what genuinely excites them about their field
+  - character_and_drive: work ethic, how they handle failure or boredom, what drives them, \
+    intellectual curiosity, personality and values
 
 INTERVIEW GUIDELINES:
 - Speak like a supportive mentor, not a form. Be warm, specific, and encouraging.
-- Build on what the student just said before asking the next question.
+- Build naturally on what the student just said before moving to the next topic.
 - Ask ONE question at a time. Make it feel like a real conversation.
-- Each question should touch on MULTIPLE coverage areas at once where natural — e.g. ask \
-  about goals and values in the same question.
-- Do not repeat topics already covered.
-- Aim for 3–5 questions TOTAL then wrap up. This is a quick demo interview.
-- After 3 substantive student responses, write a warm closing message and set is_complete = true \
-  (all coverage areas will be at least 1 by then).
+- Go DEEP — follow up on an interesting answer before moving on when it warrants it.
+- Do not repeat topics already covered. Skip areas already clear from the resume.
+- Aim for 8–10 questions TOTAL to build a complete, nuanced picture.
+- After 8+ substantive student responses with all coverage areas at depth 2+, \
+  write a warm closing message and set is_complete = true.
 
 ALWAYS respond using the interview_turn tool — never reply as plain text.
 """
@@ -93,12 +110,12 @@ async def stream_interview_turn(
     coverage_hint = (
         f"\n\n[Internal tracker — do not mention to student: "
         f"student responses so far={question_count}, "
-        f"academics={current_coverage['academics']}/1, "
-        f"activities={current_coverage['activities']}/1, "
-        f"goals={current_coverage['goals']}/1, "
-        f"values={current_coverage['values']}/1, "
-        f"opportunity_fit={current_coverage['opportunity_fit']}/1. "
-        f"Signal is_complete=true after 3+ student responses with all areas >= 1.]"
+        f"academics={current_coverage.get('academics', 0)}/2, "
+        f"extracurriculars={current_coverage.get('extracurriculars', 0)}/2, "
+        f"experience_and_projects={current_coverage.get('experience_and_projects', 0)}/2, "
+        f"goals_and_interests={current_coverage.get('goals_and_interests', 0)}/2, "
+        f"character_and_drive={current_coverage.get('character_and_drive', 0)}/2. "
+        f"Signal is_complete=true after 8+ student responses with all areas >= 2.]"
     )
     if messages and messages[-1]["role"] == "user":
         messages = messages[:-1] + [

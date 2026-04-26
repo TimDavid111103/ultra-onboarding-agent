@@ -11,39 +11,6 @@ type Message = {
   streaming?: boolean
 }
 
-type Coverage = {
-  academics: number
-  activities: number
-  goals: number
-  values: number
-  opportunity_fit: number
-}
-
-const COVERAGE_LABELS: Record<keyof Coverage, string> = {
-  academics: 'Academics',
-  activities: 'Activities',
-  goals: 'Goals',
-  values: 'Values',
-  opportunity_fit: 'Opportunities',
-}
-
-function CoverageBar({ label, value }: { label: string; value: number }) {
-  const pct = Math.round((value / 3) * 100)
-  return (
-    <div>
-      <div className="flex justify-between text-xs mb-1">
-        <span className="text-zinc-400">{label}</span>
-        <span className="text-zinc-600">{value}/3</span>
-      </div>
-      <div className="h-1.5 rounded-full bg-zinc-800">
-        <div
-          className="h-full rounded-full bg-[#6b5a9e] transition-all duration-500"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-    </div>
-  )
-}
 
 export default function ChatInterface({ sessionId }: { sessionId: string }) {
   const router = useRouter()
@@ -52,9 +19,7 @@ export default function ChatInterface({ sessionId }: { sessionId: string }) {
   const [isStreaming, setIsStreaming] = useState(false)
   const [isComplete, setIsComplete] = useState(false)
   const [isSynthesizing, setIsSynthesizing] = useState(false)
-  const [coverage, setCoverage] = useState<Coverage>({
-    academics: 0, activities: 0, goals: 0, values: 0, opportunity_fit: 0,
-  })
+  const [coverage, setCoverage] = useState<Record<string, number>>({})
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -199,8 +164,6 @@ export default function ChatInterface({ sessionId }: { sessionId: string }) {
     }
   }
 
-  const allCovered = Object.values(coverage).every((v) => v >= 2)
-
   return (
     <div className="flex h-screen bg-black">
       {/* Sidebar */}
@@ -210,16 +173,7 @@ export default function ChatInterface({ sessionId }: { sessionId: string }) {
           <p className="text-white font-semibold text-sm">Onboarding Interview</p>
         </div>
 
-        <div>
-          <p className="text-xs font-semibold text-zinc-600 uppercase tracking-wider mb-3">Coverage</p>
-          <div className="flex flex-col gap-3">
-            {(Object.keys(COVERAGE_LABELS) as (keyof Coverage)[]).map((key) => (
-              <CoverageBar key={key} label={COVERAGE_LABELS[key]} value={coverage[key]} />
-            ))}
-          </div>
-        </div>
-
-        {(isComplete || allCovered) && (
+        {isComplete && (
           <button
             onClick={handleGenerateProfile}
             disabled={isSynthesizing}
@@ -235,7 +189,7 @@ export default function ChatInterface({ sessionId }: { sessionId: string }) {
         {/* Mobile header */}
         <div className="md:hidden flex items-center justify-between bg-zinc-950 border-b border-zinc-800 px-4 py-3">
           <p className="text-white font-semibold text-sm">Ultra Onboarding</p>
-          {(isComplete || allCovered) && (
+          {isComplete && (
             <button
               onClick={handleGenerateProfile}
               disabled={isSynthesizing}
