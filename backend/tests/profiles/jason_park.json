@@ -1,0 +1,128 @@
+{
+  "_description": "High-achieving research-track student. Paid lab experience at UT Austin, AIME qualifier x2, co-authored workshop paper. No entrepreneurial instinct. Expected: Internship Tier 2, College Score 2, Entrepreneurship Tier 5, Research Tier 2.",
+  "resume_data": {
+    "name": "Jason Park",
+    "graduation_year": 2026,
+    "gpa": 4.0,
+    "test_scores": { "SAT": 1560, "ACT": 35 },
+    "courses": [
+      "AP Computer Science A", "AP Physics C: Mechanics", "AP Physics C: E&M",
+      "AP Chemistry", "AP Calculus BC", "AP Statistics", "AP Biology"
+    ],
+    "activities": [
+      "Science Olympiad (captain, state finalist)",
+      "Math Team (AIME qualifier, 2023 and 2024)",
+      "Research Assistant, UT Austin Computational Biology Lab (1.5 years)"
+    ],
+    "work_experience": [
+      "Paid research assistant, UT Austin Iyengar Lab — summer 2025"
+    ],
+    "skills": ["Python", "C++", "PyTorch", "NumPy", "R", "LaTeX", "Git", "Bash"],
+    "awards": [
+      "AIME qualifier (2023, 2024)",
+      "Regional Science Fair — 1st place, computational biology division",
+      "NSF-REU participant"
+    ],
+    "summary_detected": ""
+  },
+  "conversation": [
+    {
+      "role": "assistant",
+      "content": "Jason, your resume shows you've been working at UT Austin's Computational Biology Lab for a year and a half — that's unusual at your stage. Can you walk me through what you're actually doing there? Not the title, but the real work."
+    },
+    {
+      "role": "user",
+      "content": "I'm working on protein contact map prediction using graph neural networks. Basically, given a protein sequence, we're trying to predict which amino acid pairs are spatially close in the folded structure. It's useful for understanding protein function without needing expensive experimental methods. I started by doing literature reviews and data preprocessing, but now I'm running experiments and modifying the model architecture myself."
+    },
+    {
+      "role": "assistant",
+      "content": "That's real research — not shadowing, not busywork. Has any of that work produced output beyond the lab?"
+    },
+    {
+      "role": "user",
+      "content": "Yeah. We submitted a paper to a NeurIPS computational biology workshop. I'm third author. My contribution was designing the cross-attention module we added to improve long-range contact prediction. It didn't get accepted but we got reviewer feedback and we're revising it. We're planning to resubmit to ICLR next cycle."
+    },
+    {
+      "role": "assistant",
+      "content": "Third author on a workshop submission as a high schooler is genuinely rare. Let me ask about the math side — you've qualified for AIME twice. How seriously do you compete, and what does that training look like?"
+    },
+    {
+      "role": "user",
+      "content": "I'm the top scorer on our team both years. I do about an hour of problem sets most evenings — AoPS, past AMC/AIME problems. I qualified with a 112 and 118 on the AMC 12. I enjoy it more than I probably should. There's something satisfying about a problem that looks impossible and then clicks."
+    },
+    {
+      "role": "assistant",
+      "content": "That discipline comes through clearly. Science Olympiad — you captained the team to a state finals appearance. What did that actually take?"
+    },
+    {
+      "role": "user",
+      "content": "We'd never made state before. I reorganized how we assigned events — matched people to events based on where they could actually score, not just what they wanted to do. I ran weekly practice sessions and made study packets for each event. It was honestly more logistics than science, which surprised me. We placed 8th at state out of 40 teams."
+    },
+    {
+      "role": "assistant",
+      "content": "That's a meaningful result. Where are you aiming for college, and what do you want to do with all of this?"
+    },
+    {
+      "role": "user",
+      "content": "MIT and Stanford are my first choices. I want to do a PhD in computational biology or ML — probably focusing on structure prediction or genomics. I'd like to end up running my own lab eventually. I've been emailing professors at both schools. One at Stanford has already responded and we've had two conversations."
+    },
+    {
+      "role": "assistant",
+      "content": "That level of outreach is smart. Let me ask something different — have you ever thought about building a product, starting something, or applying your work outside of an academic context?"
+    },
+    {
+      "role": "user",
+      "content": "Not really, honestly. I've thought about it a little but I don't think I'm wired that way. I don't like ambiguity without a clear problem definition. In research you have a question, a method, a result. In a startup it feels like you're making everything up. I respect people who do it, it's just not where my head goes naturally."
+    },
+    {
+      "role": "assistant",
+      "content": "That's honest and self-aware. Last thing — when you sit down to work on something hard, what actually drives you to keep going?"
+    },
+    {
+      "role": "user",
+      "content": "I think it's just that I want to understand things completely. I can't leave a problem alone if I feel like I don't fully understand why something works. It's kind of compulsive. I'll spend three hours on one proof or one failed experiment not because I have to but because I need to know why it didn't work."
+    },
+    {
+      "role": "assistant",
+      "content": "That intellectual compulsion is exactly what research demands. Jason, this has been a really strong conversation — you've got a clearer picture of where you're going than most students twice your age. We have everything we need to build your profile."
+    }
+  ],
+  "github_activity": {
+    "total_contributions_last_6_months": 284,
+    "monthly_breakdown": {
+      "2025-10": 58,
+      "2025-11": 47,
+      "2025-12": 31,
+      "2026-01": 62,
+      "2026-02": 44,
+      "2026-03": 42
+    },
+    "public_repos": 8,
+    "top_repos": [
+      {
+        "name": "protein-contact-gnn",
+        "stars": 14,
+        "forks": 3,
+        "primary_language": "Python",
+        "description": "Graph neural network for protein contact map prediction"
+      },
+      {
+        "name": "aime-solutions",
+        "stars": 6,
+        "forks": 1,
+        "primary_language": "Python",
+        "description": "Annotated solutions to AMC/AIME problems"
+      },
+      {
+        "name": "bio-data-utils",
+        "stars": 2,
+        "forks": 0,
+        "primary_language": "Python",
+        "description": "Preprocessing utilities for genomics datasets"
+      }
+    ],
+    "top_languages": ["Python", "C++", "R"],
+    "longest_streak_days": 34,
+    "account_age_years": 3
+  }
+}
