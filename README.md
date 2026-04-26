@@ -46,9 +46,8 @@ ultra-onboarding-agent/
 │   │   └── document_parser.py           # Extracts raw text from PDF and DOCX uploads
 │   │
 │   └── tests/
-│       ├── run_synthesizer.py           # Eval runner: loads a fixture and calls the synthesizer directly
-│       └── fixtures/
-│           └── session_ai_builder_no_traction.json  # Test case: strong builder, no traction or validation
+│       ├── run_synthesizer.py           # Eval runner: loads a profile and calls the synthesizer directly
+│       └── profiles/                    # JSON test profiles; add one per student scenario you want to eval
 │
 └── frontend/
     ├── app/
@@ -84,11 +83,11 @@ npm run dev
 
 Requires `backend/.env` with `ANTHROPIC_API_KEY=...`
 
-**Running the synthesizer in isolation** (fixture-based eval):
+**Running the synthesizer in isolation** (profile-based eval):
 ```bash
 cd backend
-python tests/run_synthesizer.py
-python tests/run_synthesizer.py tests/fixtures/session_ai_builder_no_traction.json --ratings-only
+python tests/run_synthesizer.py tests/profiles/my_profile.json
+python tests/run_synthesizer.py tests/profiles/my_profile.json --ratings-only
 ```
 
 ---

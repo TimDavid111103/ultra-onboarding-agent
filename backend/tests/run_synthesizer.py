@@ -1,8 +1,8 @@
 """
 Usage:
-  python tests/run_synthesizer.py                                      # runs default fixture
-  python tests/run_synthesizer.py fixtures/session_ai_builder_no_traction.json
-  python tests/run_synthesizer.py fixtures/session_ai_builder_no_traction.json --ratings-only
+  python tests/run_synthesizer.py                          # runs default profile
+  python tests/run_synthesizer.py profiles/my_profile.json
+  python tests/run_synthesizer.py profiles/my_profile.json --ratings-only
 """
 import json
 import sys
@@ -16,7 +16,7 @@ load_dotenv(Path(__file__).parent.parent / ".env")
 
 from agents.synthesizer import synthesize_profile
 
-DEFAULT_FIXTURE = Path(__file__).parent / "fixtures" / "session_ai_builder_no_traction.json"
+DEFAULT_FIXTURE = Path(__file__).parent / "profiles"
 
 
 def load_fixture(path: Path) -> tuple[dict, list[dict], dict | None]:
@@ -99,20 +99,28 @@ def main() -> None:
     ratings_only = "--ratings-only" in args
     args = [a for a in args if not a.startswith("--")]
 
-    fixture_path = Path(args[0]) if args else DEFAULT_FIXTURE
-    if not fixture_path.is_absolute():
-        fixture_path = Path(__file__).parent / fixture_path
-    if not fixture_path.exists():
-        print(f"Fixture not found: {fixture_path}", file=sys.stderr)
+    if args:
+        profile_path = Path(args[0])
+        if not profile_path.is_absolute():
+            profile_path = Path(__file__).parent / profile_path
+    else:
+        profiles = sorted(DEFAULT_FIXTURE.glob("*.json"))
+        if not profiles:
+            print("No profiles found. Add a JSON file to tests/profiles/ or pass a path as an argument.", file=sys.stderr)
+            sys.exit(1)
+        profile_path = profiles[0]
+
+    if not profile_path.exists():
+        print(f"Profile not found: {profile_path}", file=sys.stderr)
         sys.exit(1)
 
-    description = json.loads(fixture_path.read_text()).get("_description", "")
+    description = json.loads(profile_path.read_text()).get("_description", "")
     if description:
-        print(f"\nFixture: {fixture_path.name}")
+        print(f"\nProfile: {profile_path.name}")
         print(f"Notes:   {description}")
 
     print("\nRunning synthesizer… (this makes a live API call)")
-    resume_data, conversation, github_activity = load_fixture(fixture_path)
+    resume_data, conversation, github_activity = load_fixture(profile_path)
     if github_activity:
         print(f"GitHub activity: {github_activity['total_contributions_last_6_months']} contributions over 6 months")
     profile = synthesize_profile(resume_data, conversation, github_activity)
