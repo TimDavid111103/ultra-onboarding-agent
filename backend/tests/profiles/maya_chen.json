@@ -87,14 +87,14 @@
     }
   ],
   "github_activity": {
-    "total_contributions_last_6_months": 22,
+    "total_contributions_last_6_months": 44,
     "monthly_breakdown": {
-      "2025-10": 8,
-      "2025-11": 3,
-      "2025-12": 4,
-      "2026-01": 2,
-      "2026-02": 3,
-      "2026-03": 2
+      "2025-10": 16,
+      "2025-11": 6,
+      "2025-12": 8,
+      "2026-01": 4,
+      "2026-02": 6,
+      "2026-03": 4
     },
     "public_repos": 1,
     "top_repos": [
@@ -107,7 +107,7 @@
       }
     ],
     "top_languages": ["Python", "JavaScript", "HTML"],
-    "longest_streak_days": 9,
+    "longest_streak_days": 18,
     "account_age_years": 2
   }
 }
