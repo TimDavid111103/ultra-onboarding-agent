@@ -102,7 +102,7 @@ def main() -> None:
     if args:
         profile_path = Path(args[0])
         if not profile_path.is_absolute():
-            profile_path = Path(__file__).parent / profile_path
+            profile_path = Path.cwd() / profile_path
     else:
         profiles = sorted(DEFAULT_FIXTURE.glob("*.json"))
         if not profiles:
