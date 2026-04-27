@@ -49,7 +49,7 @@ def section(title, story):
 def build_resume(profile_path: Path) -> Path:
     data = json.loads(profile_path.read_text())
     r = data["resume_data"]
-    out = Path.cwd() / f"{profile_path.stem}_resume.pdf"
+    out = Path.home() / "Desktop" / f"{profile_path.stem}_resume.pdf"
 
     doc = SimpleDocTemplate(str(out), pagesize=letter,
                             leftMargin=MARGIN, rightMargin=MARGIN,
