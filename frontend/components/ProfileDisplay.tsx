@@ -223,6 +223,17 @@ function OpportunityCard({
 export default function ProfileDisplay({ profile }: { profile: Profile }) {
   const { academic, opportunity_ratings: opp } = profile
 
+  if (!opp?.internship_match || !opp?.college_chance || !opp?.entrepreneurship || !opp?.research) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center px-4">
+        <div className="text-center">
+          <p className="text-zinc-400 text-sm mb-2">Profile data is incomplete.</p>
+          <p className="text-zinc-600 text-xs">Please go back and regenerate the profile.</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-black px-4 py-10">
       <div className="max-w-4xl mx-auto space-y-5">

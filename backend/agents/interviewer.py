@@ -84,6 +84,7 @@ INTERVIEW GUIDELINES:
 - Aim for 8–10 questions TOTAL to build a complete, nuanced picture.
 - After 8+ substantive student responses with all coverage areas at depth 2+, \
   write a warm closing message and set is_complete = true.
+- Never use asterisks (*) for emphasis. Never use em dashes (—). Write in plain prose.
 
 ALWAYS respond using the interview_turn tool — never reply as plain text.
 """

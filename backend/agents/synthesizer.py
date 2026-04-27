@@ -450,7 +450,7 @@ def synthesize_profile(
 
     response = client.messages.create(
         model="claude-sonnet-4-6",
-        max_tokens=8000,
+        max_tokens=16000,
         system=SYSTEM_PROMPT,
         tools=[PROFILE_TOOL],
         tool_choice={"type": "tool", "name": "create_student_profile"},
@@ -459,6 +459,11 @@ def synthesize_profile(
 
     for block in response.content:
         if hasattr(block, "type") and block.type == "tool_use" and block.name == "create_student_profile":
-            return block.input
+            profile = block.input
+            opp = profile.get("opportunity_ratings", {})
+            missing = [k for k in ("internship_match", "college_chance", "entrepreneurship", "research") if k not in opp]
+            if missing:
+                raise RuntimeError(f"Synthesizer returned incomplete opportunity_ratings (missing: {missing}). Response may have been truncated.")
+            return profile
 
     raise RuntimeError("Synthesizer did not return a student profile")

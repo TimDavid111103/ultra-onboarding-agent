@@ -12,6 +12,13 @@ type Message = {
 }
 
 
+function cleanContent(text: string): string {
+  return text
+    .replace(/\*/g, '')
+    .replace(/\s*—\s*/g, ' ')
+    .replace(/ {2,}/g, ' ')
+}
+
 export default function ChatInterface({ sessionId }: { sessionId: string }) {
   const router = useRouter()
   const [messages, setMessages] = useState<Message[]>([])
@@ -22,6 +29,7 @@ export default function ChatInterface({ sessionId }: { sessionId: string }) {
   const [coverage, setCoverage] = useState<Record<string, number>>({})
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const streamingLock = useRef(false)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -38,7 +46,8 @@ export default function ChatInterface({ sessionId }: { sessionId: string }) {
 
   const sendMessage = useCallback(
     async (text: string) => {
-      if (!text.trim() || isStreaming) return
+      if (!text.trim() || streamingLock.current) return
+      streamingLock.current = true
       setInput('')
 
       const userMsg: Message = { role: 'user', content: text }
@@ -132,10 +141,11 @@ export default function ChatInterface({ sessionId }: { sessionId: string }) {
           return next
         })
       } finally {
+        streamingLock.current = false
         setIsStreaming(false)
       }
     },
-    [isStreaming, sessionId],
+    [sessionId],
   )
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -165,116 +175,88 @@ export default function ChatInterface({ sessionId }: { sessionId: string }) {
   }
 
   return (
-    <div className="flex h-screen bg-black">
-      {/* Sidebar */}
-      <div className="hidden md:flex w-64 flex-col bg-zinc-950 border-r border-zinc-800 p-5 gap-6">
-        <div>
-          <p className="text-xs font-semibold text-zinc-600 uppercase tracking-wider mb-1">Ultra</p>
-          <p className="text-white font-semibold text-sm">Onboarding Interview</p>
+    <div className="flex h-screen flex-col bg-[#111111] items-center">
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto w-full">
+        <div className="max-w-[840px] mx-auto px-6 pt-10 pb-4">
+          {(() => {
+            const visible = messages.filter(
+              (m) => !(m.role === 'user' && m.content === "Hello! I'm ready to get started.")
+            )
+            const lastStreamingIdx = visible.reduce((idx, m, i) => (m.streaming ? i : idx), -1)
+            return visible.map((msg, i) => (
+              <div key={i} className={`mb-8 flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                {msg.role === 'user' ? (
+                  <div className="max-w-[80%] rounded-3xl bg-zinc-800 px-5 py-3.5 text-[16px] leading-relaxed text-zinc-100 font-[var(--font-sans)]">
+                    {msg.content}
+                  </div>
+                ) : (
+                  <div className="w-full text-[19px] leading-[1.35] text-zinc-100 whitespace-pre-wrap" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
+                    {cleanContent(msg.content)}
+                    {i === lastStreamingIdx && (
+                      <span className="inline-block w-0.5 h-4 bg-zinc-400 ml-0.5 animate-pulse align-middle" />
+                    )}
+                  </div>
+                )}
+              </div>
+            ))
+          })()}
+          <div ref={bottomRef} />
         </div>
-
-        {isComplete && (
-          <button
-            onClick={handleGenerateProfile}
-            disabled={isSynthesizing}
-            className="mt-auto w-full rounded-xl bg-zinc-700 hover:bg-zinc-600 disabled:opacity-60 disabled:cursor-wait px-4 py-3 text-white font-semibold text-sm transition-colors"
-          >
-            {isSynthesizing ? 'Building profile…' : 'Generate Profile →'}
-          </button>
-        )}
       </div>
 
-      {/* Chat area */}
-      <div className="flex flex-1 flex-col min-w-0">
-        {/* Mobile header */}
-        <div className="md:hidden flex items-center justify-between bg-zinc-950 border-b border-zinc-800 px-4 py-3">
-          <p className="text-white font-semibold text-sm">Ultra Onboarding</p>
-          {isComplete && (
+      {/* Input */}
+      <div className="w-full max-w-[840px] mx-auto px-6 pb-8 pt-2">
+        {isComplete ? (
+          <div className="text-center py-4">
+            <p className="text-zinc-500 text-sm mb-4">
+              The interview is complete. Ready to generate your profile.
+            </p>
             <button
               onClick={handleGenerateProfile}
               disabled={isSynthesizing}
-              className="rounded-lg bg-zinc-700 hover:bg-zinc-600 disabled:opacity-60 px-3 py-1.5 text-white font-medium text-xs transition-colors"
+              className="rounded-2xl bg-zinc-800 hover:bg-zinc-700 disabled:opacity-60 px-7 py-3 text-white font-medium text-sm transition-colors"
             >
-              {isSynthesizing ? 'Building…' : 'Generate Profile →'}
+              {isSynthesizing ? 'Building your profile…' : 'Generate My Profile →'}
             </button>
-          )}
-        </div>
-
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-5">
-          {messages
-            .filter((m) => !(m.role === 'user' && m.content === "Hello! I'm ready to get started."))
-            .map((msg, i) => (
-              <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                {msg.role === 'assistant' && (
-                  <div className="h-7 w-7 rounded-full bg-zinc-700 flex items-center justify-center mr-2 mt-1 shrink-0">
-                    <span className="text-white text-xs font-bold">U</span>
-                  </div>
-                )}
-                <div
-                  className={[
-                    'max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap',
-                    msg.role === 'user'
-                      ? 'bg-zinc-700 text-white rounded-br-sm'
-                      : 'bg-zinc-900 text-zinc-100 rounded-bl-sm',
-                  ].join(' ')}
-                >
-                  {msg.content}
-                  {msg.streaming && (
-                    <span className="inline-block w-0.5 h-3.5 bg-[#8b7aaa] ml-0.5 animate-pulse align-middle" />
-                  )}
-                </div>
-              </div>
-            ))}
-          <div ref={bottomRef} />
-        </div>
-
-        {/* Input */}
-        {!isComplete && (
-          <div className="border-t border-zinc-800 bg-zinc-950 px-4 py-3">
-            <form onSubmit={handleSubmit} className="flex items-end gap-2">
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <div className="rounded-2xl bg-zinc-900 border border-zinc-800 overflow-hidden">
               <textarea
                 ref={textareaRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 disabled={isStreaming}
-                placeholder="Type your answer… (Enter to send, Shift+Enter for new line)"
+                placeholder="Reply…"
                 rows={1}
-                className="flex-1 resize-none rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-100 placeholder-zinc-600 px-4 py-3 text-sm focus:outline-none focus:border-zinc-600 transition-colors disabled:opacity-50 min-h-[48px] max-h-36"
-                style={{ height: 'auto' }}
-                onInput={(e) => {
-                  const el = e.currentTarget
-                  el.style.height = 'auto'
-                  el.style.height = `${el.scrollHeight}px`
-                }}
+                className="w-full resize-none bg-transparent text-zinc-100 placeholder-zinc-600 px-4 pt-4 pb-2 text-[15px] focus:outline-none disabled:opacity-50 h-12 overflow-y-auto font-[var(--font-sans)]"
               />
-              <button
-                type="submit"
-                disabled={isStreaming || !input.trim()}
-                className="h-12 w-12 rounded-xl bg-zinc-700 hover:bg-zinc-600 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition-colors shrink-0"
-              >
-                <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                </svg>
-              </button>
-            </form>
-          </div>
-        )}
-
-        {isComplete && (
-          <div className="border-t border-zinc-800 bg-zinc-950 px-4 py-4 text-center">
-            <p className="text-zinc-400 text-sm mb-3">
-              The interview is complete! Click below to generate your profile.
-            </p>
-            <button
-              onClick={handleGenerateProfile}
-              disabled={isSynthesizing}
-              className="rounded-xl bg-zinc-700 hover:bg-zinc-600 disabled:opacity-60 px-6 py-3 text-white font-semibold text-sm transition-colors"
-            >
-              {isSynthesizing ? 'Building your profile…' : 'Generate My Profile →'}
-            </button>
-          </div>
+              <div className="flex items-center justify-between px-3 pb-3 pt-1">
+                <div className="flex items-center gap-1">
+                  {/* + button */}
+                  <button
+                    type="button"
+                    className="h-8 w-8 rounded-full flex items-center justify-center text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
+                  >
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                  </button>
+                </div>
+                <button
+                  type="submit"
+                  disabled={isStreaming || !input.trim()}
+                  className="h-8 w-8 rounded-full bg-zinc-700 hover:bg-zinc-600 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+                >
+                  <svg className="h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </form>
         )}
       </div>
     </div>
