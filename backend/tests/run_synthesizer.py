@@ -2,13 +2,12 @@
 Usage:
   python tests/run_synthesizer.py                          # runs default profile
   python tests/run_synthesizer.py profiles/my_profile.json
-  python tests/run_synthesizer.py profiles/my_profile.json --ratings-only
+  python tests/run_synthesizer.py profiles/my_profile.json --full
 """
 import json
 import sys
 from pathlib import Path
 
-# Make backend/ importable when running from backend/ or project root
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from dotenv import load_dotenv
@@ -18,85 +17,130 @@ from agents.synthesizer import synthesize_profile
 
 DEFAULT_FIXTURE = Path(__file__).parent / "profiles"
 
+VERTICAL_KEYS = {
+    "Internship Match":  "internship_match",
+    "College Chance":    "college_chance",
+    "Entrepreneurship":  "entrepreneurship",
+    "Research":          "research",
+}
+
+SUBCATEGORY_LABELS = {
+    "internship_match": [
+        ("Skills & Talent",        "skills_and_talent"),
+        ("Development Experience", "development_experience"),
+        ("Work Ethic & Output",    "work_ethic_and_output"),
+    ],
+    "college_chance": [
+        ("Academic",        "academic"),
+        ("Extracurriculars","extracurriculars"),
+        ("Mind",            "mind"),
+        ("Athletic",        "athletic"),
+        ("Personality",     "personality"),
+    ],
+    "entrepreneurship": [
+        ("Skills & Talent",       "skills_and_talent"),
+        ("Venture Talent",        "venture_talent"),
+        ("Commitment & Work Ethic","commitment_and_work_ethic"),
+    ],
+    "research": [
+        ("Scientific Depth",      "scientific_depth_and_understanding"),
+        ("Prior Experience",      "prior_experience_and_projects"),
+        ("Commitment & Learning", "commitment_and_learning"),
+    ],
+}
+
+
+def confidence_label(score: int) -> str:
+    if score >= 80:
+        return f"● {score}%  [HIGH]"
+    if score >= 50:
+        return f"● {score}%  [MED]"
+    return f"● {score}%  [LOW]"
+
 
 def load_fixture(path: Path) -> tuple[dict, list[dict], dict | None]:
     data = json.loads(path.read_text())
     return data["resume_data"], data["conversation"], data.get("github_activity")
 
 
-def print_ratings_summary(profile: dict) -> None:
-    ratings = profile.get("opportunity_ratings", {})
-    areas = {
-        "Internship Match":    ("overall_tier",  ratings.get("internship_match",  {})),
-        "College Chance":      ("overall",        ratings.get("college_chance",    {})),
-        "Entrepreneurship":    ("overall_tier",   ratings.get("entrepreneurship",  {})),
-        "Research":            ("overall_tier",   ratings.get("research",          {})),
-    }
-    print("\n── Opportunity Ratings Summary ──────────────────────")
-    for area, (key, block) in areas.items():
-        overall = block.get(key, "?")
-        label = "Score" if area == "College Chance" else "Tier"
-        print(f"  {area:<22} {label} {overall}")
+def print_profile(profile: dict, full: bool = False) -> None:
+    opp = profile.get("opportunity_ratings", {})
 
-    print("\n── Subcriteria ──────────────────────────────────────")
-    subcriteria_map = {
-        "Internship Match": [
-            ("Skills & Talent",       "skills_and_talent",       "rating"),
-            ("Development Experience","development_experience",   "rating"),
-            ("Work Ethic & Output",   "work_ethic_and_output",   "rating"),
-        ],
-        "College Chance": [
-            ("Academic",              "academic",       "score"),
-            ("Extracurriculars",      "extracurriculars","score"),
-            ("Mind",                  "mind",           "score"),
-            ("Athletic",              "athletic",       "score"),
-            ("Personality",           "personality",    "score"),
-            ("Overall (holistic)",    "overall",        None),
-        ],
-        "Entrepreneurship": [
-            ("Skills & Talent",       "skills_and_talent",          "rating"),
-            ("Venture Talent",        "venture_talent",             "rating"),
-            ("Commitment",            "commitment_and_work_ethic",  "rating"),
-        ],
-        "Research": [
-            ("Scientific Depth",      "scientific_depth_and_understanding","rating"),
-            ("Prior Experience",      "prior_experience_and_projects",    "rating"),
-            ("Commitment & Learning", "commitment_and_learning",          "rating"),
-        ],
-    }
-    area_key_map = {
-        "Internship Match": "internship_match",
-        "College Chance":   "college_chance",
-        "Entrepreneurship": "entrepreneurship",
-        "Research":         "research",
-    }
-    for area, criteria in subcriteria_map.items():
-        block = ratings.get(area_key_map[area], {})
-        print(f"\n  {area}")
-        for display_name, field, value_key in criteria:
-            if value_key is None:
-                # flat integer field (e.g. college_chance.overall — not an average,
-                # weighted toward strengths; anchored by strongest core criteria)
-                val = block.get(field, "?")
-                print(f"    {display_name:<24} {val}  — weighted toward strengths, not an average")
-            else:
-                sub = block.get(field, {})
-                val = sub.get(value_key, "?")
-                rationale = sub.get("rationale", "")
-                print(f"    {display_name:<24} {val}  — {rationale[:80]}{'…' if len(rationale) > 80 else ''}")
+    # ── Signal confidence overview ────────────────────────
+    print("\n── Signal Confidence ────────────────────────────────")
+    for label, key in VERTICAL_KEYS.items():
+        block = opp.get(key, {})
+        score = block.get("confidence", "?")
+        cl = confidence_label(score) if isinstance(score, int) else str(score)
+        print(f"  {label:<22} {cl}")
 
-    print("\n── Priority Actions ─────────────────────────────────")
-    for area, area_key in area_key_map.items():
-        actions = ratings.get(area_key, {}).get("priority_actions", [])
-        if actions:
-            print(f"\n  {area}")
-            for action in actions:
-                print(f"    → {action}")
+    # ── Per-vertical detail ───────────────────────────────
+    for label, key in VERTICAL_KEYS.items():
+        block = opp.get(key, {})
+        print(f"\n{'━' * 52}")
+        print(f"  {label}  —  {confidence_label(block.get('confidence', '?'))}")
+        print(f"{'━' * 52}")
+
+        summary = block.get("summary", "")
+        if summary:
+            print(f"\n  {summary}")
+
+        for sub_label, sub_key in SUBCATEGORY_LABELS.get(key, []):
+            ctx = block.get(sub_key, {}).get("context", "")
+            if ctx:
+                print(f"\n  [{sub_label}]")
+                # Word-wrap at ~72 chars
+                words, line = ctx.split(), ""
+                for word in words:
+                    if len(line) + len(word) + 1 > 72:
+                        print(f"    {line}")
+                        line = word
+                    else:
+                        line = f"{line} {word}".strip()
+                if line:
+                    print(f"    {line}")
+
+        key_points = block.get("key_points", [])
+        if key_points:
+            print(f"\n  Key Points")
+            for pt in key_points:
+                print(f"    → {pt}")
+
+    # ── Skills / Interests / Goals ────────────────────────
+    print(f"\n{'━' * 52}")
+    print("  Skills / Interests / Goals")
+    print(f"{'━' * 52}")
+
+    skills = profile.get("skills", {})
+    tech = skills.get("technical", [])
+    soft = skills.get("soft", [])
+    if tech:
+        print(f"\n  Technical:  {', '.join(tech)}")
+    if soft:
+        print(f"  Soft:       {', '.join(soft)}")
+
+    interests = profile.get("interests", [])
+    if interests:
+        print(f"  Interests:  {', '.join(interests)}")
+
+    goals = profile.get("goals", {})
+    if goals.get("career_direction"):
+        print(f"  Career:     {goals['career_direction']}")
+    if goals.get("college_targets"):
+        print(f"  Colleges:   {', '.join(goals['college_targets'])}")
+    if goals.get("research_interests"):
+        print(f"  Research:   {', '.join(goals['research_interests'])}")
+
+    if full:
+        print(f"\n{'━' * 52}")
+        print("  Full Profile JSON")
+        print(f"{'━' * 52}")
+        print(json.dumps(profile, indent=2))
 
 
 def main() -> None:
     args = sys.argv[1:]
-    ratings_only = "--ratings-only" in args
+    full = "--full" in args
     args = [a for a in args if not a.startswith("--")]
 
     if args:
@@ -106,7 +150,7 @@ def main() -> None:
     else:
         profiles = sorted(DEFAULT_FIXTURE.glob("*.json"))
         if not profiles:
-            print("No profiles found. Add a JSON file to tests/profiles/ or pass a path as an argument.", file=sys.stderr)
+            print("No profiles found.", file=sys.stderr)
             sys.exit(1)
         profile_path = profiles[0]
 
@@ -123,14 +167,9 @@ def main() -> None:
     resume_data, conversation, github_activity = load_fixture(profile_path)
     if github_activity:
         print(f"GitHub activity: {github_activity['total_contributions_last_6_months']} contributions over 6 months")
-    profile = synthesize_profile(resume_data, conversation, github_activity)
 
-    if ratings_only:
-        print_ratings_summary(profile)
-    else:
-        print_ratings_summary(profile)
-        print("\n── Full Profile JSON ────────────────────────────────")
-        print(json.dumps(profile, indent=2))
+    profile = synthesize_profile(resume_data, conversation, github_activity)
+    print_profile(profile, full=full)
 
 
 if __name__ == "__main__":

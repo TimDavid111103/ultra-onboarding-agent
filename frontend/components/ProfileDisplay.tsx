@@ -2,16 +2,47 @@
 
 // ---- Types ---------------------------------------------------------------
 
-type SubCriterion = { rating: number; rationale: string }
-type SubCriterionScore = { score: number | null; rationale: string }
+type SubcategoryContext = { confidence: number; context: string }
+
+type InternshipMatchSection = {
+  confidence: number
+  summary: string
+  skills_and_talent: SubcategoryContext
+  development_experience: SubcategoryContext
+  work_ethic_and_output: SubcategoryContext
+  key_points: string[]
+}
+
+type CollegeChanceSection = {
+  confidence: number
+  summary: string
+  academic: SubcategoryContext
+  extracurriculars: SubcategoryContext
+  mind: SubcategoryContext
+  athletic: SubcategoryContext
+  personality: SubcategoryContext
+  key_points: string[]
+}
+
+type EntrepreneurshipSection = {
+  confidence: number
+  summary: string
+  skills_and_talent: SubcategoryContext
+  venture_talent: SubcategoryContext
+  commitment_and_work_ethic: SubcategoryContext
+  key_points: string[]
+}
+
+type ResearchSection = {
+  confidence: number
+  summary: string
+  scientific_depth_and_understanding: SubcategoryContext
+  prior_experience_and_projects: SubcategoryContext
+  commitment_and_learning: SubcategoryContext
+  key_points: string[]
+}
 
 type Profile = {
-  academic: {
-    gpa?: number | null
-    graduation_year?: number | null
-    test_scores: { SAT?: number | null; ACT?: number | null }
-    courses: string[]
-  }
   skills: { technical: string[]; soft: string[] }
   interests: string[]
   goals: {
@@ -19,68 +50,28 @@ type Profile = {
     career_direction: string
     research_interests: string[]
   }
-  experience: { title: string; org: string; description: string }[]
   opportunity_ratings: {
-    internship_match: {
-      skills_and_talent: SubCriterion
-      development_experience: SubCriterion
-      work_ethic_and_output: SubCriterion
-      overall_tier: number
-      priority_actions: string[]
-    }
-    college_chance: {
-      academic: SubCriterionScore
-      extracurriculars: SubCriterionScore
-      mind: SubCriterionScore
-      athletic: SubCriterionScore
-      personality: SubCriterionScore
-      overall: number
-      priority_actions: string[]
-    }
-    entrepreneurship: {
-      skills_and_talent: SubCriterion
-      venture_talent: SubCriterion
-      commitment_and_work_ethic: SubCriterion
-      overall_tier: number
-      priority_actions: string[]
-    }
-    research: {
-      scientific_depth_and_understanding: SubCriterion
-      prior_experience_and_projects: SubCriterion
-      commitment_and_learning: SubCriterion
-      overall_tier: number
-      priority_actions: string[]
-    }
+    internship_match: InternshipMatchSection
+    college_chance: CollegeChanceSection
+    entrepreneurship: EntrepreneurshipSection
+    research: ResearchSection
   }
 }
 
 // ---- Primitives ----------------------------------------------------------
 
-function tierColors(value: number | null): { badge: string; bar: string } {
-  if (value === null) return { badge: 'bg-zinc-800 text-zinc-500', bar: 'bg-zinc-700' }
-  if (value <= 2) return { badge: 'bg-emerald-900/60 text-emerald-300', bar: 'bg-emerald-500' }
-  if (value === 3) return { badge: 'bg-amber-900/50 text-amber-300', bar: 'bg-amber-500' }
-  return { badge: 'bg-rose-900/50 text-rose-300', bar: 'bg-rose-500' }
+function confidenceColors(score: number) {
+  if (score >= 80) return { dot: 'bg-emerald-400', badge: 'bg-emerald-900/50 text-emerald-300', bar: 'bg-emerald-500' }
+  if (score >= 50) return { dot: 'bg-amber-400',   badge: 'bg-amber-900/40 text-amber-300',   bar: 'bg-amber-500'   }
+  return                  { dot: 'bg-rose-400',    badge: 'bg-rose-900/40 text-rose-300',     bar: 'bg-rose-500'    }
 }
 
-function TierBadge({
-  value,
-  label,
-  size = 'sm',
-}: {
-  value: number | null
-  label?: string
-  size?: 'sm' | 'lg'
-}) {
-  const { badge } = tierColors(value)
-  const displayLabel = label ?? (value !== null ? `Tier ${value}` : 'N/A')
+function ConfidenceBadge({ score }: { score: number }) {
+  const { dot, badge } = confidenceColors(score)
   return (
-    <span
-      className={`inline-block rounded-lg font-semibold ${badge} ${
-        size === 'lg' ? 'px-4 py-1.5 text-base' : 'px-2.5 py-0.5 text-xs'
-      }`}
-    >
-      {displayLabel}
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${badge}`}>
+      <span className={`h-1.5 w-1.5 rounded-full ${dot}`} />
+      {score}% signal
     </span>
   )
 }
@@ -106,109 +97,75 @@ function Tag({
   )
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function SubcategoryCard({ name, confidence, context }: { name: string; confidence: number; context: string }) {
+  const { dot, badge } = confidenceColors(confidence)
   return (
-    <div className="bg-zinc-900 rounded-2xl p-6 border border-zinc-800">
-      <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-4">{title}</h2>
-      {children}
+    <div className="bg-zinc-800/60 rounded-xl border border-zinc-700/50 p-4">
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <p className="text-zinc-500 text-xs font-semibold uppercase tracking-wider">{name}</p>
+        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${badge}`}>
+          <span className={`h-1 w-1 rounded-full ${dot}`} />
+          {confidence}%
+        </span>
+      </div>
+      <p className="text-zinc-300 text-sm leading-relaxed">{context}</p>
     </div>
   )
 }
 
-// ---- Criterion row inside an opportunity card ----------------------------
-
-function CriterionRow({
-  name,
-  value,
-  rationale,
-  valueType = 'tier',
-}: {
-  name: string
-  value: number | null
-  rationale: string
-  valueType?: 'tier' | 'score'
-}) {
-  const { bar } = tierColors(value)
-  const displayLabel = value !== null ? `${valueType === 'score' ? 'Score' : 'Tier'} ${value}` : 'N/A'
-  const pct = value !== null ? Math.round(((6 - value) / 5) * 100) : 0
-
-  return (
-    <div className="py-3 border-b border-zinc-800 last:border-0">
-      <div className="flex items-center justify-between gap-3 mb-1.5">
-        <span className="text-zinc-300 text-sm font-medium">{name}</span>
-        <TierBadge value={value} label={displayLabel} />
-      </div>
-      <div className="w-full h-1 rounded-full bg-zinc-800 mb-2">
-        <div className={`h-full rounded-full ${bar}`} style={{ width: `${pct}%` }} />
-      </div>
-      <p className="text-zinc-500 text-xs leading-relaxed">{rationale}</p>
-    </div>
-  )
-}
-
-// ---- Full opportunity area card ------------------------------------------
-
-function OpportunityCard({
+function VerticalCard({
   title,
-  axiom,
-  overallValue,
-  overallLabel,
-  overallType,
-  criteria,
-  priorityActions,
+  confidence,
+  summary,
+  subcategories,
+  keyPoints,
 }: {
   title: string
-  axiom: string
-  overallValue: number
-  overallLabel: string
-  overallType: 'tier' | 'score'
-  criteria: { name: string; value: number | null; rationale: string; valueType?: 'tier' | 'score' }[]
-  priorityActions: string[]
+  confidence: number
+  summary: string
+  subcategories: { name: string; confidence: number; context: string }[]
+  keyPoints: string[]
 }) {
+  const { bar } = confidenceColors(confidence)
   return (
     <div className="bg-zinc-900 rounded-2xl border border-zinc-800 overflow-hidden">
       {/* Header */}
-      <div className="p-6 pb-4 border-b border-zinc-800">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h2 className="text-white font-semibold text-lg">{title}</h2>
-            <p className="text-zinc-500 text-xs mt-1 leading-relaxed max-w-sm">{axiom}</p>
-          </div>
-          <div className="text-right shrink-0">
-            <div className="text-zinc-500 text-xs mb-1">{overallLabel}</div>
-            <TierBadge
-              value={overallValue}
-              label={`${overallType === 'score' ? 'Score' : 'Tier'} ${overallValue}`}
-              size="lg"
-            />
-          </div>
+      <div className="px-6 pt-6 pb-4 border-b border-zinc-800">
+        <div className="flex items-start justify-between gap-4 mb-3">
+          <h2 className="text-white font-semibold text-lg">{title}</h2>
+          <ConfidenceBadge score={confidence} />
+        </div>
+        {/* Confidence bar */}
+        <div className="w-full h-0.5 rounded-full bg-zinc-800">
+          <div className={`h-full rounded-full ${bar} transition-all`} style={{ width: `${confidence}%` }} />
         </div>
       </div>
 
-      {/* Criteria */}
-      <div className="px-6">
-        {criteria.map((c) => (
-          <CriterionRow
-            key={c.name}
-            name={c.name}
-            value={c.value}
-            rationale={c.rationale}
-            valueType={c.valueType ?? overallType}
-          />
-        ))}
+      {/* Summary */}
+      <div className="px-6 pt-5 pb-4">
+        <p className="text-zinc-400 text-sm leading-relaxed">{summary}</p>
       </div>
 
-      {/* Priority Actions */}
-      {priorityActions.length > 0 && (
-        <div className="px-6 pb-6 pt-4">
-          <p className="text-zinc-500 text-xs font-semibold uppercase tracking-wider mb-2">
-            Priority Actions
+      {/* Subcategories */}
+      <div className="px-6 pb-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          {subcategories.map((s) => (
+            <SubcategoryCard key={s.name} name={s.name} confidence={s.confidence} context={s.context} />
+          ))}
+        </div>
+      </div>
+
+      {/* Key Points */}
+      {keyPoints.length > 0 && (
+        <div className="px-6 pb-6 pt-1 border-t border-zinc-800">
+          <p className="text-zinc-500 text-xs font-semibold uppercase tracking-wider mb-3 mt-4">
+            Key Points
           </p>
-          <ul className="space-y-1.5">
-            {priorityActions.map((action, i) => (
+          <ul className="space-y-2">
+            {keyPoints.map((pt, i) => (
               <li key={i} className="flex items-start gap-2 text-sm text-zinc-300">
                 <span className="text-[#8b7aaa] mt-0.5 shrink-0">→</span>
-                {action}
+                {pt}
               </li>
             ))}
           </ul>
@@ -221,7 +178,7 @@ function OpportunityCard({
 // ---- Main component ------------------------------------------------------
 
 export default function ProfileDisplay({ profile }: { profile: Profile }) {
-  const { academic, opportunity_ratings: opp } = profile
+  const { skills, interests, goals, opportunity_ratings: opp } = profile
 
   if (!opp?.internship_match || !opp?.college_chance || !opp?.entrepreneurship || !opp?.research) {
     return (
@@ -240,282 +197,136 @@ export default function ProfileDisplay({ profile }: { profile: Profile }) {
 
         {/* Header */}
         <div className="bg-zinc-900 rounded-2xl p-8 border border-zinc-800">
-          <div className="inline-flex items-center gap-2 bg-zinc-800 border border-zinc-700 rounded-full px-3 py-1 mb-3">
+          <div className="inline-flex items-center gap-2 bg-zinc-800 border border-zinc-700 rounded-full px-3 py-1 mb-4">
             <span className="h-1.5 w-1.5 rounded-full bg-[#8b7aaa]" />
-            <span className="text-[#8b7aaa] text-xs font-medium tracking-wide uppercase">
-              Ultra Student Profile
-            </span>
+            <span className="text-[#8b7aaa] text-xs font-medium tracking-wide uppercase">Ultra Student Profile</span>
           </div>
-          <h1 className="font-serif text-white text-2xl font-bold mb-1">Opportunity Assessment</h1>
-          <p className="text-zinc-400 text-sm">
-            Rubric-based ratings across four areas — each tier reflects external validation, not
-            self-reported intent.
+          <h1 className="text-white text-2xl font-bold mb-1">Conversation Intelligence</h1>
+          <p className="text-zinc-400 text-sm leading-relaxed">
+            What the interview revealed beyond the resume — organized by downstream agent criteria.
+            Signal confidence reflects conversation coverage, not student quality.
           </p>
+        </div>
 
-          {/* Quick overview tiles */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
-            {[
-              { label: 'Internship Match', value: opp.internship_match.overall_tier, type: 'tier' as const },
-              { label: 'College Chance',   value: opp.college_chance.overall,        type: 'score' as const },
-              { label: 'Entrepreneurship', value: opp.entrepreneurship.overall_tier, type: 'tier' as const },
-              { label: 'Research',         value: opp.research.overall_tier,         type: 'tier' as const },
-            ].map(({ label, value, type }) => (
-              <div key={label} className="bg-zinc-800 rounded-xl p-4 text-center">
-                <p className="text-zinc-500 text-xs mb-2">{label}</p>
-                <TierBadge
-                  value={value}
-                  label={`${type === 'score' ? 'Score' : 'Tier'} ${value}`}
-                  size="lg"
-                />
-              </div>
-            ))}
+        {/* Skills / Goals / Interests */}
+        <div className="grid md:grid-cols-3 gap-5">
+
+          <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
+            <p className="text-zinc-500 text-xs font-semibold uppercase tracking-wider mb-3">Skills</p>
+            <div className="space-y-3">
+              {skills.technical.length > 0 && (
+                <div>
+                  <p className="text-zinc-600 text-xs mb-1.5">Technical</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {skills.technical.map((s) => <Tag key={s} text={s} color="violet" />)}
+                  </div>
+                </div>
+              )}
+              {skills.soft.length > 0 && (
+                <div>
+                  <p className="text-zinc-600 text-xs mb-1.5">Soft Skills</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {skills.soft.map((s) => <Tag key={s} text={s} color="slate" />)}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
+
+          <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
+            <p className="text-zinc-500 text-xs font-semibold uppercase tracking-wider mb-3">Goals</p>
+            <div className="space-y-3">
+              {goals.career_direction && (
+                <div>
+                  <p className="text-zinc-600 text-xs mb-1">Career Direction</p>
+                  <p className="text-zinc-300 text-sm leading-relaxed">{goals.career_direction}</p>
+                </div>
+              )}
+              {goals.college_targets.length > 0 && (
+                <div>
+                  <p className="text-zinc-600 text-xs mb-1.5">Target Schools</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {goals.college_targets.map((s) => <Tag key={s} text={s} color="amber" />)}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
+            <p className="text-zinc-500 text-xs font-semibold uppercase tracking-wider mb-3">Interests</p>
+            <div className="space-y-3">
+              {interests.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {interests.map((i) => <Tag key={i} text={i} color="violet" />)}
+                </div>
+              )}
+              {goals.research_interests.length > 0 && (
+                <div>
+                  <p className="text-zinc-600 text-xs mb-1.5">Research</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {goals.research_interests.map((r) => <Tag key={r} text={r} color="sky" />)}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
         </div>
 
         {/* Internship Match */}
-        <OpportunityCard
+        <VerticalCard
           title="Internship Match"
-          axiom="Tier is determined by external validation and demonstrated output — shipping something real that others use is the primary signal."
-          overallValue={opp.internship_match.overall_tier}
-          overallLabel="Overall Tier"
-          overallType="tier"
-          criteria={[
-            {
-              name: 'Skills & Talent',
-              value: opp.internship_match.skills_and_talent.rating,
-              rationale: opp.internship_match.skills_and_talent.rationale,
-            },
-            {
-              name: 'Development Experience',
-              value: opp.internship_match.development_experience.rating,
-              rationale: opp.internship_match.development_experience.rationale,
-            },
-            {
-              name: 'Work Ethic & Output',
-              value: opp.internship_match.work_ethic_and_output.rating,
-              rationale: opp.internship_match.work_ethic_and_output.rationale,
-            },
+          confidence={opp.internship_match.confidence}
+          summary={opp.internship_match.summary}
+          subcategories={[
+            { name: 'Skills & Talent',        confidence: opp.internship_match.skills_and_talent.confidence,        context: opp.internship_match.skills_and_talent.context },
+            { name: 'Development Experience', confidence: opp.internship_match.development_experience.confidence,   context: opp.internship_match.development_experience.context },
+            { name: 'Work Ethic & Output',    confidence: opp.internship_match.work_ethic_and_output.confidence,    context: opp.internship_match.work_ethic_and_output.context },
           ]}
-          priorityActions={opp.internship_match.priority_actions}
+          keyPoints={opp.internship_match.key_points}
         />
 
         {/* College Chance */}
-        <OpportunityCard
+        <VerticalCard
           title="College Chance"
-          axiom="Overall score is not an average — it weights strengths and ignores weak areas. All Score 1s got into Harvard; over 50% of Score 2s did."
-          overallValue={opp.college_chance.overall}
-          overallLabel="Overall Score"
-          overallType="score"
-          criteria={[
-            {
-              name: 'Academic',
-              value: opp.college_chance.academic.score,
-              rationale: opp.college_chance.academic.rationale,
-              valueType: 'score',
-            },
-            {
-              name: 'Extracurriculars',
-              value: opp.college_chance.extracurriculars.score,
-              rationale: opp.college_chance.extracurriculars.rationale,
-              valueType: 'score',
-            },
-            {
-              name: 'Mind',
-              value: opp.college_chance.mind.score,
-              rationale: opp.college_chance.mind.rationale,
-              valueType: 'score',
-            },
-            {
-              name: 'Athletic',
-              value: opp.college_chance.athletic.score,
-              rationale: opp.college_chance.athletic.rationale,
-              valueType: 'score',
-            },
-            {
-              name: 'Personality',
-              value: opp.college_chance.personality.score,
-              rationale: opp.college_chance.personality.rationale,
-              valueType: 'score',
-            },
+          confidence={opp.college_chance.confidence}
+          summary={opp.college_chance.summary}
+          subcategories={[
+            { name: 'Academic',         confidence: opp.college_chance.academic.confidence,         context: opp.college_chance.academic.context },
+            { name: 'Extracurriculars', confidence: opp.college_chance.extracurriculars.confidence, context: opp.college_chance.extracurriculars.context },
+            { name: 'Mind',             confidence: opp.college_chance.mind.confidence,             context: opp.college_chance.mind.context },
+            { name: 'Athletic',         confidence: opp.college_chance.athletic.confidence,         context: opp.college_chance.athletic.context },
+            { name: 'Personality',      confidence: opp.college_chance.personality.confidence,      context: opp.college_chance.personality.context },
           ]}
-          priorityActions={opp.college_chance.priority_actions}
+          keyPoints={opp.college_chance.key_points}
         />
 
         {/* Entrepreneurship */}
-        <OpportunityCard
+        <VerticalCard
           title="Entrepreneurship"
-          axiom="Venture Talent is the differentiating criterion. Prospective user interest does not count — only paying customers, MRR, and engagement metrics move the needle."
-          overallValue={opp.entrepreneurship.overall_tier}
-          overallLabel="Overall Tier"
-          overallType="tier"
-          criteria={[
-            {
-              name: 'Skills & Talent',
-              value: opp.entrepreneurship.skills_and_talent.rating,
-              rationale: opp.entrepreneurship.skills_and_talent.rationale,
-            },
-            {
-              name: 'Venture Talent',
-              value: opp.entrepreneurship.venture_talent.rating,
-              rationale: opp.entrepreneurship.venture_talent.rationale,
-            },
-            {
-              name: 'Commitment & Work Ethic',
-              value: opp.entrepreneurship.commitment_and_work_ethic.rating,
-              rationale: opp.entrepreneurship.commitment_and_work_ethic.rationale,
-            },
+          confidence={opp.entrepreneurship.confidence}
+          summary={opp.entrepreneurship.summary}
+          subcategories={[
+            { name: 'Skills & Talent',         confidence: opp.entrepreneurship.skills_and_talent.confidence,         context: opp.entrepreneurship.skills_and_talent.context },
+            { name: 'Venture Talent',          confidence: opp.entrepreneurship.venture_talent.confidence,            context: opp.entrepreneurship.venture_talent.context },
+            { name: 'Commitment & Work Ethic', confidence: opp.entrepreneurship.commitment_and_work_ethic.confidence, context: opp.entrepreneurship.commitment_and_work_ethic.context },
           ]}
-          priorityActions={opp.entrepreneurship.priority_actions}
+          keyPoints={opp.entrepreneurship.key_points}
         />
 
         {/* Research */}
-        <OpportunityCard
+        <VerticalCard
           title="Research"
-          axiom="The ceiling without formal lab work or publications is Tier 3 regardless of subject matter depth. Named researchers, actual papers, and exact methodologies separate Tier 2 from Tier 3."
-          overallValue={opp.research.overall_tier}
-          overallLabel="Overall Tier"
-          overallType="tier"
-          criteria={[
-            {
-              name: 'Scientific Depth & Understanding',
-              value: opp.research.scientific_depth_and_understanding.rating,
-              rationale: opp.research.scientific_depth_and_understanding.rationale,
-            },
-            {
-              name: 'Prior Experience & Projects',
-              value: opp.research.prior_experience_and_projects.rating,
-              rationale: opp.research.prior_experience_and_projects.rationale,
-            },
-            {
-              name: 'Commitment & Learning',
-              value: opp.research.commitment_and_learning.rating,
-              rationale: opp.research.commitment_and_learning.rationale,
-            },
+          confidence={opp.research.confidence}
+          summary={opp.research.summary}
+          subcategories={[
+            { name: 'Scientific Depth',      confidence: opp.research.scientific_depth_and_understanding.confidence, context: opp.research.scientific_depth_and_understanding.context },
+            { name: 'Prior Experience',      confidence: opp.research.prior_experience_and_projects.confidence,      context: opp.research.prior_experience_and_projects.context },
+            { name: 'Commitment & Learning', confidence: opp.research.commitment_and_learning.confidence,            context: opp.research.commitment_and_learning.context },
           ]}
-          priorityActions={opp.research.priority_actions}
+          keyPoints={opp.research.key_points}
         />
-
-        {/* Two-column: Academic + Goals */}
-        <div className="grid md:grid-cols-2 gap-5">
-
-          {/* Academic */}
-          <Section title="Academic Profile">
-            <div className="flex gap-6 mb-4">
-              {academic.gpa && (
-                <div>
-                  <p className="text-2xl font-bold text-white">{academic.gpa}</p>
-                  <p className="text-zinc-500 text-xs">GPA</p>
-                </div>
-              )}
-              {academic.test_scores?.SAT && (
-                <div>
-                  <p className="text-2xl font-bold text-white">{academic.test_scores.SAT}</p>
-                  <p className="text-zinc-500 text-xs">SAT</p>
-                </div>
-              )}
-              {academic.test_scores?.ACT && (
-                <div>
-                  <p className="text-2xl font-bold text-white">{academic.test_scores.ACT}</p>
-                  <p className="text-zinc-500 text-xs">ACT</p>
-                </div>
-              )}
-              {academic.graduation_year && (
-                <div>
-                  <p className="text-2xl font-bold text-white">{academic.graduation_year}</p>
-                  <p className="text-zinc-500 text-xs">Grad Year</p>
-                </div>
-              )}
-            </div>
-            {academic.courses.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {academic.courses.map((c) => (
-                  <Tag key={c} text={c} color="sky" />
-                ))}
-              </div>
-            )}
-          </Section>
-
-          {/* Goals & Interests */}
-          <Section title="Goals & Interests">
-            <div className="space-y-3">
-              <div>
-                <p className="text-zinc-500 text-xs mb-1">Career Direction</p>
-                <p className="text-zinc-300 text-sm">{profile.goals.career_direction}</p>
-              </div>
-              {profile.goals.college_targets.length > 0 && (
-                <div>
-                  <p className="text-zinc-500 text-xs mb-1.5">Target Schools</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {profile.goals.college_targets.map((s) => (
-                      <Tag key={s} text={s} color="amber" />
-                    ))}
-                  </div>
-                </div>
-              )}
-              {profile.interests.length > 0 && (
-                <div>
-                  <p className="text-zinc-500 text-xs mb-1.5">Interests</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {profile.interests.map((r) => (
-                      <Tag key={r} text={r} color="violet" />
-                    ))}
-                  </div>
-                </div>
-              )}
-              {profile.goals.research_interests.length > 0 && (
-                <div>
-                  <p className="text-zinc-500 text-xs mb-1.5">Research Interests</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {profile.goals.research_interests.map((r) => (
-                      <Tag key={r} text={r} color="sky" />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </Section>
-
-          {/* Skills */}
-          <Section title="Skills">
-            <div className="space-y-3">
-              {profile.skills.technical.length > 0 && (
-                <div>
-                  <p className="text-zinc-500 text-xs mb-1.5">Technical</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {profile.skills.technical.map((s) => (
-                      <Tag key={s} text={s} color="violet" />
-                    ))}
-                  </div>
-                </div>
-              )}
-              {profile.skills.soft.length > 0 && (
-                <div>
-                  <p className="text-zinc-500 text-xs mb-1.5">Soft Skills</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {profile.skills.soft.map((s) => (
-                      <Tag key={s} text={s} color="slate" />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </Section>
-
-          {/* Experience */}
-          {profile.experience.length > 0 && (
-            <Section title="Experience">
-              <div className="space-y-4">
-                {profile.experience.map((w, i) => (
-                  <div key={i} className="border-l-2 border-zinc-700 pl-4">
-                    <p className="text-zinc-100 font-medium text-sm">{w.title}</p>
-                    <p className="text-zinc-500 text-xs mb-1">{w.org}</p>
-                    <p className="text-zinc-400 text-xs leading-relaxed">{w.description}</p>
-                  </div>
-                ))}
-              </div>
-            </Section>
-          )}
-        </div>
 
       </div>
     </div>
