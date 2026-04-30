@@ -1,14 +1,20 @@
 # Ultra Onboarding Agent
 
-A self-initiated project built around a problem observed on [useultra.ai](https://useultra.ai) — students need a fast, intelligent way to go from a resume to a rich, structured profile that Ultra can use to match them to the right opportunities.
+A self-initiated project built for [useultra.ai](https://useultra.ai). Students need a fast, intelligent way to go from a resume to a rich profile that Ultra can act on. This agent does that in a single onboarding session.
 
-## What it does
+---
 
-The agent conducts a conversational onboarding interview with a high school student, then synthesizes everything — resume, conversation, and GitHub activity — into a structured profile with rubric-based opportunity ratings across four areas: **College Admissions**, **Internships**, **Research**, and **Entrepreneurship**.
+## What It Does
 
-## How it fits into Ultra
+The agent conducts a conversational interview with a high school student, then synthesizes the resume, conversation, and GitHub activity into a structured profile. That profile includes confidence scores and conversation-sourced context for each of Ultra's four downstream agents: College Chance, Internship Match, Research, and Entrepreneurship.
 
-Ultra matches students to opportunities. This agent solves the cold-start problem: getting enough signal on a new student to make those matches meaningful. The output profile is designed to feed directly into Ultra's matching layer.
+---
+
+## How It Fits Into Ultra
+
+Ultra routes students to opportunities. The bottleneck is signal: a resume alone isn't enough to make confident matches. This agent solves that by running a targeted intake interview and producing a profile that the downstream agents can evaluate immediately, without needing to ask the student anything again.
+
+The confidence scores in the output reflect how much rubric-relevant evidence exists for each area, not how much the topic came up in conversation. A student with no products scores near zero on Venture Talent. A student with 18 months of formal lab work scores near 100 on Research Prior Experience.
 
 ---
 
@@ -16,9 +22,9 @@ Ultra matches students to opportunities. This agent solves the cold-start proble
 
 Three Claude-powered agents run in sequence:
 
-1. **Resume Parser** — extracts structured fields from a raw PDF or DOCX upload
-2. **Interviewer** — conducts an 8–10 question SSE-streamed conversation to fill in what the resume misses
-3. **Synthesizer** — combines resume data, conversation transcript, and GitHub activity into a rated student profile
+1. **Resume Parser** — extracts structured fields from a PDF or DOCX upload
+2. **Interviewer** — runs an 8-10 question SSE-streamed conversation, tracking coverage across five areas internally
+3. **Synthesizer** — combines resume, transcript, and GitHub activity into a rated profile using tool-forced structured output
 
 ---
 
@@ -28,44 +34,45 @@ Three Claude-powered agents run in sequence:
 ultra-onboarding-agent/
 │
 ├── backend/
-│   ├── main.py                          # FastAPI app; all endpoints wired here
-│   ├── requirements.txt                 # Python dependencies
+│   ├── main.py                          # FastAPI app and all endpoints
+│   ├── requirements.txt
 │   │
 │   ├── agents/
 │   │   ├── resume_parser.py             # Parses uploaded document into structured resume fields
-│   │   ├── interviewer.py               # Streams interview turns; tracks 5-area coverage internally
-│   │   └── synthesizer.py               # Produces rated student profile using tool-forced JSON output
+│   │   ├── interviewer.py               # Streams interview turns; tracks 5-area coverage
+│   │   └── synthesizer.py               # Produces rated student profile via Pydantic + tool use
 │   │
 │   ├── constants/
-│   │   └── github_activity.py           # Default GitHub activity block used in live app (average student)
+│   │   ├── rubrics.py                   # Downstream agent grading rubrics injected into synthesizer
+│   │   └── github_activity.py           # Default GitHub activity block (average student baseline)
 │   │
 │   ├── models/
-│   │   └── schemas.py                   # Session dataclass + shape comments for all major data types
+│   │   └── schemas.py                   # Session dataclass + Pydantic models for profile output
 │   │
 │   ├── utils/
 │   │   └── document_parser.py           # Extracts raw text from PDF and DOCX uploads
 │   │
 │   └── tests/
-│       ├── run_synthesizer.py           # Eval runner: loads a profile and calls the synthesizer directly
-│       └── profiles/                    # JSON test profiles; add one per student scenario you want to eval
+│       ├── run_synthesizer.py           # Eval runner: loads a profile fixture and calls synthesizer
+│       └── profiles/                    # JSON test fixtures; one per student scenario
 │
 └── frontend/
     ├── app/
-    │   ├── layout.tsx                   # Root layout; loads Playfair Display + Geist Sans fonts
-    │   ├── globals.css                  # Global styles; zinc-based dark theme, CSS variables
-    │   ├── page.tsx                     # Landing page with resume upload flow
-    │   ├── onboarding/page.tsx          # Interview page; renders ChatInterface component
-    │   └── profile/[sessionId]/page.tsx # Profile results page; renders ProfileDisplay component
+    │   ├── layout.tsx
+    │   ├── globals.css
+    │   ├── page.tsx                     # Landing page with resume upload
+    │   ├── onboarding/page.tsx          # Interview page
+    │   └── profile/[sessionId]/page.tsx # Profile results page
     │
     └── components/
-        ├── ResumeUpload.tsx             # Drag-and-drop resume upload; kicks off a session
-        ├── ChatInterface.tsx            # SSE-streamed chat UI; signals completion when interview is done
-        └── ProfileDisplay.tsx           # Renders all four opportunity rating blocks with subcriteria
+        ├── ResumeUpload.tsx             # Drag-and-drop upload; starts a session
+        ├── ChatInterface.tsx            # Streaming chat UI; shows generate button on completion
+        └── ProfileDisplay.tsx           # Renders confidence scores and context for all four verticals
 ```
 
 ---
 
-## Running locally
+## Running Locally
 
 **Backend**
 ```bash
@@ -81,13 +88,11 @@ npm install
 npm run dev
 ```
 
-Requires `backend/.env` with `ANTHROPIC_API_KEY=...`
+Requires `backend/.env` with `ANTHROPIC_API_KEY=sk-...`
 
-**Running the synthesizer in isolation** (profile-based eval):
+**Test the synthesizer in isolation:**
 ```bash
 cd backend
-python tests/run_synthesizer.py tests/profiles/my_profile.json
-python tests/run_synthesizer.py tests/profiles/my_profile.json --ratings-only
+python tests/run_synthesizer.py tests/profiles/jason_park.json
+python tests/run_synthesizer.py tests/profiles/jason_park.json --full
 ```
-
----
