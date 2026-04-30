@@ -61,16 +61,15 @@ type Profile = {
 // ---- Primitives ----------------------------------------------------------
 
 function confidenceColors(score: number) {
-  if (score >= 80) return { dot: 'bg-emerald-400', badge: 'bg-emerald-900/50 text-emerald-300', bar: 'bg-emerald-500' }
-  if (score >= 50) return { dot: 'bg-amber-400',   badge: 'bg-amber-900/40 text-amber-300',   bar: 'bg-amber-500'   }
-  return                  { dot: 'bg-rose-400',    badge: 'bg-rose-900/40 text-rose-300',     bar: 'bg-rose-500'    }
+  if (score >= 80) return { badge: 'bg-emerald-900/50 text-emerald-300', bar: 'bg-emerald-500' }
+  if (score >= 50) return { badge: 'bg-yellow-900/40 text-yellow-400',   bar: 'bg-yellow-500'  }
+  return                  { badge: 'bg-rose-900/40 text-rose-300',       bar: 'bg-rose-500'    }
 }
 
 function ConfidenceBadge({ score }: { score: number }) {
-  const { dot, badge } = confidenceColors(score)
+  const { badge } = confidenceColors(score)
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${badge}`}>
-      <span className={`h-1.5 w-1.5 rounded-full ${dot}`} />
+    <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${badge}`}>
       {score}% signal
     </span>
   )
@@ -81,14 +80,15 @@ function Tag({
   color = 'slate',
 }: {
   text: string
-  color?: 'slate' | 'violet' | 'emerald' | 'amber' | 'sky'
+  color?: 'slate' | 'violet' | 'emerald' | 'amber' | 'sky' | 'rose'
 }) {
   const colorMap = {
     slate:   'bg-zinc-800 text-zinc-400',
     violet:  'bg-zinc-800 text-[#9d8fc0]',
     emerald: 'bg-emerald-900/50 text-emerald-300',
     amber:   'bg-amber-900/40 text-amber-300',
-    sky:     'bg-sky-900/50 text-sky-300',
+    sky:     'bg-zinc-800 text-sky-300',
+    rose:    'bg-zinc-800 text-rose-300',
   }
   return (
     <span className={`inline-block rounded-lg px-2.5 py-1 text-xs font-medium ${colorMap[color]}`}>
@@ -98,13 +98,12 @@ function Tag({
 }
 
 function SubcategoryCard({ name, confidence, context }: { name: string; confidence: number; context: string }) {
-  const { dot, badge } = confidenceColors(confidence)
+  const { badge } = confidenceColors(confidence)
   return (
     <div className="bg-zinc-800/60 rounded-xl border border-zinc-700/50 p-4">
       <div className="flex items-center justify-between gap-2 mb-2">
         <p className="text-zinc-500 text-xs font-semibold uppercase tracking-wider">{name}</p>
-        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${badge}`}>
-          <span className={`h-1 w-1 rounded-full ${dot}`} />
+        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${badge}`}>
           {confidence}%
         </span>
       </div>
@@ -148,7 +147,7 @@ function VerticalCard({
 
       {/* Subcategories */}
       <div className="px-6 pb-5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="flex flex-col gap-3">
           {subcategories.map((s) => (
             <SubcategoryCard key={s.name} name={s.name} confidence={s.confidence} context={s.context} />
           ))}
@@ -194,85 +193,6 @@ export default function ProfileDisplay({ profile }: { profile: Profile }) {
   return (
     <div className="min-h-screen bg-black px-4 py-10">
       <div className="max-w-4xl mx-auto space-y-5">
-
-        {/* Header */}
-        <div className="bg-zinc-900 rounded-2xl p-8 border border-zinc-800">
-          <div className="inline-flex items-center gap-2 bg-zinc-800 border border-zinc-700 rounded-full px-3 py-1 mb-4">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#8b7aaa]" />
-            <span className="text-[#8b7aaa] text-xs font-medium tracking-wide uppercase">Ultra Student Profile</span>
-          </div>
-          <h1 className="text-white text-2xl font-bold mb-1">Conversation Intelligence</h1>
-          <p className="text-zinc-400 text-sm leading-relaxed">
-            What the interview revealed beyond the resume — organized by downstream agent criteria.
-            Signal confidence reflects conversation coverage, not student quality.
-          </p>
-        </div>
-
-        {/* Skills / Goals / Interests */}
-        <div className="grid md:grid-cols-3 gap-5">
-
-          <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
-            <p className="text-zinc-500 text-xs font-semibold uppercase tracking-wider mb-3">Skills</p>
-            <div className="space-y-3">
-              {skills.technical.length > 0 && (
-                <div>
-                  <p className="text-zinc-600 text-xs mb-1.5">Technical</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {skills.technical.map((s) => <Tag key={s} text={s} color="violet" />)}
-                  </div>
-                </div>
-              )}
-              {skills.soft.length > 0 && (
-                <div>
-                  <p className="text-zinc-600 text-xs mb-1.5">Soft Skills</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {skills.soft.map((s) => <Tag key={s} text={s} color="slate" />)}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
-            <p className="text-zinc-500 text-xs font-semibold uppercase tracking-wider mb-3">Goals</p>
-            <div className="space-y-3">
-              {goals.career_direction && (
-                <div>
-                  <p className="text-zinc-600 text-xs mb-1">Career Direction</p>
-                  <p className="text-zinc-300 text-sm leading-relaxed">{goals.career_direction}</p>
-                </div>
-              )}
-              {goals.college_targets.length > 0 && (
-                <div>
-                  <p className="text-zinc-600 text-xs mb-1.5">Target Schools</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {goals.college_targets.map((s) => <Tag key={s} text={s} color="amber" />)}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
-            <p className="text-zinc-500 text-xs font-semibold uppercase tracking-wider mb-3">Interests</p>
-            <div className="space-y-3">
-              {interests.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
-                  {interests.map((i) => <Tag key={i} text={i} color="violet" />)}
-                </div>
-              )}
-              {goals.research_interests.length > 0 && (
-                <div>
-                  <p className="text-zinc-600 text-xs mb-1.5">Research</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {goals.research_interests.map((r) => <Tag key={r} text={r} color="sky" />)}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-        </div>
 
         {/* Internship Match */}
         <VerticalCard
@@ -327,6 +247,72 @@ export default function ProfileDisplay({ profile }: { profile: Profile }) {
           ]}
           keyPoints={opp.research.key_points}
         />
+
+        {/* Skills / Goals / Interests */}
+        <div className="grid md:grid-cols-3 gap-5">
+
+          <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
+            <p className="text-zinc-500 text-xs font-semibold uppercase tracking-wider mb-3">Skills</p>
+            <div className="space-y-3">
+              {skills.technical.length > 0 && (
+                <div>
+                  <p className="text-zinc-600 text-xs mb-1.5">Technical</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {skills.technical.map((s) => <Tag key={s} text={s} color="violet" />)}
+                  </div>
+                </div>
+              )}
+              {skills.soft.length > 0 && (
+                <div>
+                  <p className="text-zinc-600 text-xs mb-1.5">Soft Skills</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {skills.soft.map((s) => <Tag key={s} text={s} color="rose" />)}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
+            <p className="text-zinc-500 text-xs font-semibold uppercase tracking-wider mb-3">Goals</p>
+            <div className="space-y-3">
+              {goals.career_direction && (
+                <div>
+                  <p className="text-zinc-600 text-xs mb-1">Career Direction</p>
+                  <p className="text-zinc-300 text-sm leading-relaxed">{goals.career_direction}</p>
+                </div>
+              )}
+              {goals.college_targets.length > 0 && (
+                <div>
+                  <p className="text-zinc-600 text-xs mb-1.5">Target Schools</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {goals.college_targets.map((s) => <Tag key={s} text={s} color="emerald" />)}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
+            <p className="text-zinc-500 text-xs font-semibold uppercase tracking-wider mb-3">Interests</p>
+            <div className="space-y-3">
+              {interests.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {interests.map((i) => <Tag key={i} text={i} color="violet" />)}
+                </div>
+              )}
+              {goals.research_interests.length > 0 && (
+                <div>
+                  <p className="text-zinc-600 text-xs mb-1.5">Research</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {goals.research_interests.map((r) => <Tag key={r} text={r} color="sky" />)}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+        </div>
 
       </div>
     </div>

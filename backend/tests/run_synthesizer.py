@@ -86,9 +86,12 @@ def print_profile(profile: dict, full: bool = False) -> None:
             print(f"\n  {summary}")
 
         for sub_label, sub_key in SUBCATEGORY_LABELS.get(key, []):
-            ctx = block.get(sub_key, {}).get("context", "")
+            sub = block.get(sub_key, {})
+            ctx = sub.get("context", "")
+            sub_score = sub.get("confidence", "?")
+            sub_cl = confidence_label(sub_score) if isinstance(sub_score, int) else str(sub_score)
             if ctx:
-                print(f"\n  [{sub_label}]")
+                print(f"\n  [{sub_label}]  {sub_cl}")
                 # Word-wrap at ~72 chars
                 words, line = ctx.split(), ""
                 for word in words:

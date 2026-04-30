@@ -26,6 +26,7 @@ export default function ChatInterface({ sessionId }: { sessionId: string }) {
   const [isStreaming, setIsStreaming] = useState(false)
   const [isComplete, setIsComplete] = useState(false)
   const [isSynthesizing, setIsSynthesizing] = useState(false)
+  const [isProfileReady, setIsProfileReady] = useState(false)
   const [coverage, setCoverage] = useState<Record<string, number>>({})
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -167,7 +168,7 @@ export default function ChatInterface({ sessionId }: { sessionId: string }) {
         method: 'POST',
       })
       if (!res.ok) throw new Error('Synthesis failed.')
-      router.push(`/profile/${sessionId}`)
+      setIsProfileReady(true)
     } catch {
       setIsSynthesizing(false)
       alert('Something went wrong generating your profile. Please try again.')
@@ -209,16 +210,28 @@ export default function ChatInterface({ sessionId }: { sessionId: string }) {
       <div className="w-full max-w-[840px] mx-auto px-6 pb-8 pt-2">
         {isComplete ? (
           <div className="text-center py-4">
-            <p className="text-zinc-500 text-sm mb-4">
-              The interview is complete. Ready to generate your profile.
-            </p>
-            <button
-              onClick={handleGenerateProfile}
-              disabled={isSynthesizing}
-              className="rounded-2xl bg-zinc-800 hover:bg-zinc-700 disabled:opacity-60 px-7 py-3 text-white font-medium text-sm transition-colors"
-            >
-              {isSynthesizing ? 'Building your profile…' : 'Generate My Profile →'}
-            </button>
+            {isProfileReady ? (
+              <button
+                onClick={() => router.push(`/profile/${sessionId}`)}
+                className="rounded-2xl bg-zinc-800 hover:bg-zinc-700 px-7 py-3 text-white font-medium text-sm transition-colors"
+              >
+                View Profile →
+              </button>
+            ) : isSynthesizing ? (
+              <p className="text-zinc-500 text-sm">Building your profile…</p>
+            ) : (
+              <>
+                <p className="text-zinc-500 text-sm mb-4">
+                  The interview is complete. Ready to generate your profile.
+                </p>
+                <button
+                  onClick={handleGenerateProfile}
+                  className="rounded-2xl bg-zinc-800 hover:bg-zinc-700 px-7 py-3 text-white font-medium text-sm transition-colors"
+                >
+                  Generate My Profile →
+                </button>
+              </>
+            )}
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
