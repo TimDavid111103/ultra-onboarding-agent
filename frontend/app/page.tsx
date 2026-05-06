@@ -10,7 +10,7 @@ export default function HomePage() {
         </div>
 
         <h1 className="font-serif text-4xl sm:text-5xl font-bold text-white leading-tight">
-          Tell us who you are,<br />
+          Ultra Onboarding Agent<br />
           <span className="text-[#9d8fc0]">beyond the résumé.</span>
         </h1>
 

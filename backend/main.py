@@ -1,5 +1,6 @@
 import json
 import uuid
+from pathlib import Path
 from typing import AsyncIterator
 
 from dotenv import load_dotenv
@@ -52,6 +53,28 @@ async def upload_resume(file: UploadFile = File(...)):
     sessions[session_id] = Session(session_id=session_id, resume_data=resume_data)
 
     return {"session_id": session_id, "resume_data": resume_data}
+
+
+# ---------- Demo session (Jason Park skip) ----------
+
+@app.post("/api/session/demo")
+async def load_demo_session():
+    fixture_path = Path(__file__).parent / "tests" / "profiles" / "jason_park.json"
+    data = json.loads(fixture_path.read_text())
+
+    session_id = str(uuid.uuid4())
+    sessions[session_id] = Session(
+        session_id=session_id,
+        resume_data=data["resume_data"],
+        conversation=data["conversation"],
+        is_complete=True,
+        coverage={k: 3 for k in [
+            "academics", "extracurriculars", "experience_and_projects",
+            "goals_and_interests", "character_and_drive",
+        ]},
+    )
+
+    return {"session_id": session_id, "conversation": data["conversation"]}
 
 
 # ---------- Interview message (SSE streaming) ----------
